@@ -5,22 +5,22 @@
 int main() {
     int sockfd;
     char buffer[2000];
-    struct sockaddr_in server_addr, client_addr;
-    socklen_t addr_len = sizeof(client_addr);
+    struct sockaddr_in server, client;
+    socklen_t c = sizeof(client);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);  // Create UDP socket
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(8888);
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(8888);
 
-    bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));  // Bind socket
+    bind(sockfd, (struct sockaddr *)&server, sizeof(server));  // Bind socket
     printf("Server is listening on port %d...\n", 8888);
 
     while (1) {
-        int n = recvfrom(sockfd, buffer, 2000, 0, (struct sockaddr *)&client_addr, &addr_len);  // Receive message
+        int n = recvfrom(sockfd, buffer, 2000, 0, (struct sockaddr *)&client, &c);  // Receive message
         buffer[n] = '\0';  // Null-terminate
         printf("Received: %s\n", buffer);  // Print received message
-        sendto(sockfd, buffer, 2000, 0, (struct sockaddr *)&client_addr, addr_len);  // Echo back
+        sendto(sockfd, buffer, 2000, 0, (struct sockaddr *)&client, c);  // Echo back
     }
 
     close(sockfd);  // Close socket
