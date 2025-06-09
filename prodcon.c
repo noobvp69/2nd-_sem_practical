@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define BUFFER_SIZE 5
-
 int mutex = 1;  // Mutex to control access to the buffer
-int empty = BUFFER_SIZE;  // Number of empty slots in the buffer
+int empty = 5;  // Number of empty slots in the buffer
+int buffer[5];  // Buffer to store items
 int full = 0;  // Number of filled slots in the buffer
-int buffer[BUFFER_SIZE];  // Buffer to store items
+
 int in = 0;  // Index for the next item to be produced
 int out = 0;  // Index for the next item to be consumed
 
@@ -33,7 +32,7 @@ void producer() {
     wait(&mutex);  // Enter critical section
 
     buffer[in] = item;  // Add item to the buffer
-    in = (in + 1) % BUFFER_SIZE;  // Move the producer index
+    in = (in + 1) % 5;  // Move the producer index
 
     signal(&mutex);  // Exit critical section
     signal(&full);  // Increment the count of full slots
@@ -51,7 +50,7 @@ void consumer() {
     wait(&mutex);  // Enter critical section
 
     int item = buffer[out];  // Consume item from the buffer
-    out = (out + 1) % BUFFER_SIZE;  // Move the consumer index
+    out = (out + 1) % 5;  // Move the consumer index
 
     signal(&mutex);  // Exit critical section
     signal(&empty);  // Increment the count of empty slots

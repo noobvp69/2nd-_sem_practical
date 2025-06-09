@@ -1,52 +1,77 @@
-#include <stdio.h>
-#include <string.h>
+#include<stdio.h>
+#include<stdlib.h>
 
-char disk[20][4] = {""}, fname[10][4]; // disk blocks and file names
-int start[10], length[10], count = 0;
+int empty = 5;
+int mutex =1;
+int buffer[5];
+int full=0;
+int in=0;
+int out=0;
 
-void showDirectory() {
-    printf("\nFile\tStart\tLength\n");
-    for (int i = 0; i < count; i++)
-        printf("%-4s\t%3d\t%6d\n", fname[i], start[i], length[i]);
+void wait(int *s){
+    while(*s <=0);
+    (*s)--;
+}
+void signal(int *s){
+    (*s)++;
 }
 
-void showDisk() {
-    printf("\nDisk Blocks:\n");
-    for (int i = 0; i < 20; i++) printf("%4d", i);
-    printf("\n");
-    for (int i = 0; i < 20; i++) printf("%4s", disk[i][0] ? disk[i] : ".");
-    printf("\n");
+void producer(){
+    int item;
+    if(empty==0){
+        printf("buffer is full. Cannot produce more! ");
+        return;
+    }
+    printf("Enter an item: ");
+    scanf("%d",&item);
+
+    wait(&empty);
+    wait(&mutex);
+    buffer[in]=item;
+    in=(in+1)%5;
+    signal(&mutex);
+    signal(&full);
+    printf("Produced item is %d\n",item);
 }
 
-int main() {
-    char id[4]; int st, len, ch;
-    showDisk();
+void consumer(){
+    if(full==0){
+        printf("Buffer is empty cannot consume more!");
+        return;
 
-    do {
-        printf("\nEnter file name, start block, and length: ");
-        scanf("%3s %d %d", id, &st, &len);
+    }
+    wait(&full);
+    wait(&mutex);
+    int item = buffer[out];
+    out = (out+1)%5;
+    signal(&mutex);
+    signal(&empty);
+    printf("Consumed item is %d\n",item);
+}
 
-        if (st < 0 || st + len > 20) {
-            printf("Out of bounds.\n"); continue;
+int main(){
+    int ch;
+    printf("\n1.Producer 2.Consumer 3.Exit \n");
+        
+   
+    while(1){
+         printf("\nEnter your Choice: ");
+         scanf("%d",&ch);
+
+        switch(ch){
+            case 1:
+            producer();
+            break;
+            case 2:
+            consumer();
+            break;
+            case 3:
+            printf("\nExiting...");
+            exit(0);
+            default:
+            printf("invalid reply");
         }
 
-        int free = 1;
-        for (int i = st; i < st + len; i++)
-            if (disk[i][0]) { free = 0; break; }
-
-        if (!free) {
-            printf("Blocks occupied.\n"); continue;
-        }
-
-        strcpy(fname[count], id); start[count] = st; length[count] = len;
-        for (int i = st; i < st + len; i++) strcpy(disk[i], id);
-        count++;
-
-        printf("Allocated. More? (1.Yes 2.No): ");
-        scanf("%d", &ch);
-    } while (ch == 1);
-
-    showDirectory();
-    showDisk();
-    return 0;
+    }
 }
+
