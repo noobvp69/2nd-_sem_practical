@@ -4,12 +4,12 @@
 #include <arpa/inet.h>
 
 int main() {
-    int sockfd;
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);  // Create UDP socket
     char buffer[2000];
     struct sockaddr_in server;
     socklen_t c = sizeof(server);
 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);  // Create UDP socket
+
     server.sin_family = AF_INET;
     server.sin_port = htons(8888);
     server.sin_addr.s_addr = INADDR_ANY;  // Server IP (localhost)
